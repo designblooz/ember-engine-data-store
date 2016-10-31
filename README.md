@@ -1,27 +1,18 @@
-# Ember-engine-data-store
+# Ember Engine Data Store
 
-This README outlines the details of collaborating on this Ember addon.
+Ember Engine Data Store includes `debug-adapter` and `engine-store` service. 
+
+`debug-adapter` extends default ember debug adapter that is used for ember inspector, and is registered to the application for debugging Ember Engine data store service.
+
+`engine-store` service adds all available Ember Engine data store service with all public methods available for `DS.Store` service.
+
+## Requirement
+- Ember 2.4+
 
 ## Installation
 
-* `git clone <repository-url>` this repository
-* `cd ember-engine-data-store`
-* `npm install`
-* `bower install`
+```shell
+ember install ember-engin-data-store
+```
 
-## Running
-
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
-
-## Running Tests
-
-* `npm test` (Runs `ember try:each` to test your addon against multiple Ember versions)
-* `ember test`
-* `ember test --server`
-
-## Building
-
-* `ember build`
-
-For more information on using ember-cli, visit [http://ember-cli.com/](http://ember-cli.com/).
+## Usage

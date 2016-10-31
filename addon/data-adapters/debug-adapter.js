@@ -51,16 +51,26 @@ export default DebugAdapter.extend({
     }
   },
   _nameToClass: function (type) {
-    let model;
+    let model, engineName, engineStore;
+    let typeSplit = type.split('#');
+    let modelName = typeSplit.pop();
+
+    if(typeSplit.length) {
+      engineName = typeSplit.shift();
+      engineStore = this.get('engineStore').storeFor(engineName);
+    }
 
     if (typeof type === 'string') {
       model = getOwner(this)._lookupFactory(`model:${type}`);
 
-      if(isBlank(model)) {
+      if(isBlank(model) && engineStore) {
+        model = engineStore.modelFactoryFor(modelName);
+      }
+      else if(isBlank(model)) {
         model = this.get('engineStore').lookupFactory(`model:${type}`);
       }
     }
 
-    return model || type;
+    return model;
   }
 });

@@ -1,31 +1,71 @@
 import Ember from 'ember';
 import { assert, warn } from "ember-data/-private/debug";
 
-const { get, getOwner, isPresent, isBlank, inject } = Ember;
+const { computed, get, getOwner, isPresent, isBlank, inject } = Ember;
 
-export default Ember.Service.extend({
-  store: inject.service(),
+let routeHandlerCalled = Ember.Object.create();
 
-  count: 0,
-  engineInstances: [],
-  engineStores: [],
-
+export default class EngineStore extends Ember.Service {
   init() {
-    let engines = getOwner(this).lookup('router:main')._engineInstances;
+    let target = getOwner(this);
+    this.set('router', target.lookup('router:main'));
 
-    Object.keys(engines).forEach((engineName)=> {
-      let engine = get(engines, engineName)[0];
-      let engineStore = engine.lookup('service:store');
-
-      if (isPresent(engineStore)) {
-        this.set(engineName, engineStore);
-        this.set('count', this.get('count') + 1);
-
-        this.get('engineStores').push(engineStore);
-        this.get('engineInstances').push(engine);
+    let handler = this.get('router')._getHandlerFunction();
+    Object.keys(this.get('router._engineInfoByRoute')).forEach((routeName)=> {
+      if (!routeName.includes('.') && !routeHandlerCalled.get(routeName)) {
+        routeHandlerCalled.set(routeName, true);
+        handler(routeName);
       }
     });
-  },
+  }
+
+  get store() {
+    return inject.service('store');
+  }
+
+  get routerEngineInstances() {
+    return computed.alias('router._engineInstances');
+  }
+  get routerEngineInstancesCount() {
+    return Object.keys(this.get('routerEngineInstances')).length;
+  }
+
+  get engineInstances() {
+    if (this.get('router._engineInstances')) {
+      return Object.keys(this.get('router._engineInstances')).map((engineKey)=> {
+        let engineObject = get(this.get('router._engineInstances'), engineKey);
+        let engine;
+
+        Object.keys(engineObject).forEach((key)=> {
+          engine = get(engineObject, key);
+        });
+
+        return engine;
+      });
+    }
+    return [];
+  }
+
+  get engineStores() {
+    return this.get('engineInstances').map((engine)=> {
+      return engine.lookup('service:store');
+    });
+  }
+
+  get count() {
+
+  }
+  /**
+   * @method storeFor
+   * @param  {String} engineName
+   * @return {DS.Store}
+   */
+  storeFor(engineName = '') {
+    return this.get('engineStores').find((store)=> {
+      let engine = getOwner(store);
+      return engine.get('base.modulePrefix') === engineName;
+    });
+  }
 
   /**
    * `adapterFor('user')`
@@ -42,7 +82,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('adapterFor', [modelName]);
-  },
+  }
 
   /**
    * `createRecord('user')`
@@ -59,7 +99,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('createRecord', [modelName, inputProperties]);
-  },
+  }
 
   /**
    * `findAll('user')`
@@ -76,7 +116,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('findAll', [modelName, options]);
-  },
+  }
 
   /**
    * `findRecord('user', 1)`
@@ -93,7 +133,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('findRecord', [modelName, id, options]);
-  },
+  }
 
   /**
    * `getReference('user', 1)`
@@ -110,7 +150,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('getReference', [type, id]);
-  },
+  }
 
   /**
    * `hasRecordForId('user', 1)`
@@ -127,7 +167,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('hasRecordForId', [modelName, inputId]);
-  },
+  }
 
   /**
    * `modelFor('user')`
@@ -143,8 +183,8 @@ export default Ember.Service.extend({
       return this._invokeMethodFromEngineStore(modelName[0], 'modelFor', [modelName[1]]);
     }
 
-    return this._invokeMethodFromEngineStores('modelFor', [modelName]);
-  },
+    return this._invokeMethodFromEngineStores('modelFactoryFor', [modelName]);
+  }
 
   /**
    * `modelFactoryFor('user')`
@@ -161,7 +201,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('modelFactoryFor', [modelName]);
-  },
+  }
 
   /**
    * `normalize('user', {...})`
@@ -178,7 +218,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('normalize', [modelName, payload]);
-  },
+  }
 
   /**
    * `peekAll('user')`
@@ -195,7 +235,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('peekAll', [modelName]);
-  },
+  }
 
   /**
    * `peekRecord('user', 1)`
@@ -212,7 +252,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('peekRecord', [modelName, id]);
-  },
+  }
 
   /**
    * `push('user-engine', {...})`
@@ -220,7 +260,7 @@ export default Ember.Service.extend({
    */
   push(engineName, data) {
     return this._invokeMethodFromEngineStore(engineName, 'push', [data]);
-  },
+  }
 
   /**
    * `pushPayload('user', {...})`
@@ -241,7 +281,7 @@ export default Ember.Service.extend({
       modelName = modelName.split('@');
       return this._invokeMethodFromEngineStore(modelName[0], 'pushPayload', [modelName[1], inputPayload]);
     }
-  },
+  }
 
   /**
    * `query('user', {...})`
@@ -258,7 +298,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('query', [modelName, query]);
-  },
+  }
 
   /**
    * `queryRecord('user', {...})`
@@ -275,7 +315,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('queryRecord', [modelName, query]);
-  },
+  }
 
   /**
    * `recordIsLoaded('user', 1)`
@@ -292,7 +332,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('recordIsLoaded', [modelName, id]);
-  },
+  }
 
   /**
    * `serializerFor('user', 1)`
@@ -309,7 +349,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('serializerFor', [modelName]);
-  },
+  }
 
   /**
    * `unloadAll('user')`
@@ -326,7 +366,7 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('unloadAll', [modelName]);
-  },
+  }
 
   /**
    * `unloadAll('user')`
@@ -343,23 +383,23 @@ export default Ember.Service.extend({
     }
 
     return this._invokeMethodFromEngineStores('unloadAll', [modelName]);
-  },
+  }
 
   lookupFactory(factoryName) {
     return this._lookupFactoryFromEngines(factoryName);
-  },
+  }
 
   /**
    * Private
    */
   _invokeMethodFromEngineStore(engineName, methodName, args) {
-    let engineStore = this.get(engineName);
+    let engineStore = this.storeFor(engineName);
     assert(`Store for "${engineName}" does not exist`, isPresent(engineStore));
 
     if (isPresent(engineStore) && engineStore[methodName]) {
       return engineStore[methodName].apply(engineStore, args);
     }
-  },
+  }
   _invokeMethodFromEngineStores(methodName, args) {
     let returned;
 
@@ -375,11 +415,11 @@ export default Ember.Service.extend({
     }
 
     return returned;
-  },
+  }
   _lookupFactoryFromEngine(factoryName, engineName) {
     let engine = this.get('engineInstances').findBy('name', engineName);
     return engine._lookupFactory(factoryName);
-  },
+  }
   _lookupFactoryFromEngines(factoryName) {
     let factory;
 
@@ -391,5 +431,4 @@ export default Ember.Service.extend({
 
     return factory;
   }
-});
-
+}
