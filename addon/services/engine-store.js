@@ -10,8 +10,10 @@ export default class EngineStore extends Ember.Service {
     let target = getOwner(this);
     this.set('router', target.lookup('router:main'));
 
+    let engineInfoByRoute = this.get('router._engineInfoByRoute') || this.get('router._routeToEngineInfoXRef');
     let handler = this.get('router')._getHandlerFunction();
-    Object.keys(this.get('router._engineInfoByRoute')).forEach((routeName)=> {
+
+    Object.keys(engineInfoByRoute).forEach((routeName)=> {
       if (!routeName.includes('.') && !routeHandlerCalled.get(routeName)) {
         routeHandlerCalled.set(routeName, true);
         handler(routeName);
