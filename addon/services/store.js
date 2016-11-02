@@ -18,9 +18,9 @@ export default DS.Store.extend({
     return factory;
   },
   buildInternalModel(type, id, data) {
-    let engine = this._splitKlassAndFindStore(type);
+    let engine = type ? this._splitKlassAndFindStore(type) : null;
 
-    if(engine.modulePrefix !== this.get('engineName') && engine.store) {
+    if(engine && engine.modulePrefix !== this.get('engineName') && engine.store) {
       let idToRecord = engine.store.typeMapFor(type, id).idToRecord;
       let record = idToRecord[id];
 
