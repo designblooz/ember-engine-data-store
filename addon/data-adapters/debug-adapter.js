@@ -8,11 +8,8 @@ export default DebugAdapter.extend({
   engineStore: inject.service('engine-store'),
   getRecords(modelClass, modelName = '') {
     let records;
-    const owner = getOwner(this);
-    const app = owner.application;
-    const modulePrefix = modelName.split('#').shift();
 
-    if (!modelName.includes(modulePrefix)) {
+    if (modelName.includes('#')) {
       records = this.get('engineStore').peekAll(modelName);
     }
     else {
