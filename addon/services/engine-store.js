@@ -54,9 +54,6 @@ export default class EngineStore extends Ember.Service {
     });
   }
 
-  get count() {
-
-  }
   /**
    * @method storeFor
    * @param  {String} engineName

@@ -8,8 +8,11 @@ export default DebugAdapter.extend({
   engineStore: inject.service('engine-store'),
   getRecords(modelClass, modelName = '') {
     let records;
+    const owner = getOwner(this);
+    const app = owner.application;
+    const modulePrefix = modelName.split('#').shift();
 
-    if (modelName.includes('#')) {
+    if (!modelName.includes(modulePrefix)) {
       records = this.get('engineStore').peekAll(modelName);
     }
     else {
@@ -39,7 +42,7 @@ export default DebugAdapter.extend({
   },
   _getKlassName(name) {
     let modelClass = this._nameToClass(name);
-    let appName = getOwner(this).lookup('application:main').name;
+    let appName = getOwner(this).application.modulePrefix;
 
     if(!isBlank(modelClass) && !modelClass.toString().includes(appName)) {
       name = `${modelClass.toString().split('@').shift()}#${name}`;
@@ -50,7 +53,7 @@ export default DebugAdapter.extend({
       name: name
     }
   },
-  _nameToClass: function (type) {
+  _nameToClass(type) {
     let model, engineName, engineStore;
     let typeSplit = type.split('#');
     let modelName = typeSplit.pop();
