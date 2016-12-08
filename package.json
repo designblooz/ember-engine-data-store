@@ -1,7 +1,7 @@
 {
   "name": "ember-engine-data-store",
   "version": "0.0.1",
-  "description": "Addon for ember engine data store. Show ember data that is defined within ember engine",
+  "description": "WIP. Addon for ember engine data store. Show ember data that is defined within ember engine",
   "directories": {
     "doc": "doc",
     "test": "tests"
