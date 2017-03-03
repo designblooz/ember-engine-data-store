@@ -61,7 +61,7 @@ export default DebugAdapter.extend({
     }
 
     if (typeof type === 'string') {
-      model = getOwner(this)._lookupFactory(`model:${type}`);
+      model = getOwner(this).factoryFor(`model:${type}`);
 
       if(isBlank(model) && engineStore) {
         model = engineStore.modelFactoryFor(modelName);

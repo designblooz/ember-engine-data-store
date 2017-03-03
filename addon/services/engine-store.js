@@ -417,14 +417,14 @@ export default class EngineStore extends Ember.Service {
   }
   _lookupFactoryFromEngine(factoryName, engineName) {
     let engine = this.get('engineInstances').findBy('name', engineName);
-    return engine._lookupFactory(factoryName);
+    return engine.factoryFor(factoryName);
   }
   _lookupFactoryFromEngines(factoryName) {
     let factory;
 
     this.get('engineInstances').forEach((engineInstance)=> {
       if(!factory) {
-        factory = engineInstance._lookupFactory(factoryName);
+        factory = engineInstance.factoryFor(factoryName);
       }
     });
 
