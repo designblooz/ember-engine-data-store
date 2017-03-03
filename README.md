@@ -12,7 +12,7 @@ Ember Engine Data Store includes `debug-adapter` and `engine-store` service.
 ## Installation
 
 ```shell
-ember install ember-engin-data-store
+ember install ember-engine-data-store
 ```
 
 ## Usage
