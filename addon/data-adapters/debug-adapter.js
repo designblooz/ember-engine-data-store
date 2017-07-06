@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import { assert, warn } from '@ember/debug';
 
 const { inject, getOwner, isBlank, isPresent } = Ember;
 
