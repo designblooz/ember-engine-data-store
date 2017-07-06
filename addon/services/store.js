@@ -13,9 +13,9 @@ export default DS.Store.extend({
     let factory = this.get('engineStore').modelFactoryFor(modelName);
 
     if(factory) {
-      factory.modelName = factory.modelName || modelName;
+      factory.class.modelName = factory.class.modelName || modelName;
     }
-    return factory;
+    return factory.class;
   },
   buildInternalModel(type, id, data) {
     let engine = type ? this._splitKlassAndFindStore(type) : null;
@@ -34,7 +34,7 @@ export default DS.Store.extend({
     return this._super(...arguments);
   },
   _hasModelFor(modelName) {
-    return isPresent(this.get('engineStore').modelFactoryFor(modelName));
+    return this.get('engineStore').modelFactoryFor(modelName);
   },
   _findByInternalModel(internalModel, options) {
     let engine = this._splitKlassAndFindStore(internalModel.type);
