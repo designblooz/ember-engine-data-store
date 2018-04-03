@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import { assert, warn } from "ember-data/-debug/index";
 
 const { inject, getOwner, isBlank, isPresent } = Ember;
 
@@ -34,7 +33,7 @@ export default DS.DebugAdapter.extend({
       return this._getKlassName(type);
     });
 
-    types = Ember.A(types).filter(type => this.detect(type.klass));
+    types = Ember.A(types).filter(type => this.detect(type && type.klass));
 
     return Ember.A(types);
   },
